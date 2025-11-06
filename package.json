@@ -1,6 +1,6 @@
 {
-  "name": "@sondn/mcp-hyperliquid",
-  "version": "1.0.0",
+  "name": "@sondn.contact/mcp-hyperliquid",
+  "version": "1.0.1",
   "description": "MCP server for Hyperliquid trading platform",
   "main": "build/index.js",
   "type": "module",
@@ -20,8 +20,11 @@
     "trading",
     "model-context-protocol"
   ],
-  "author": "sondn",
+  "author": "Doan Ngoc Son (sondn.5442@gmail.com)",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "@nktkas/hyperliquid": "0.25.9"
