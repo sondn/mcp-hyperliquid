@@ -1,35 +1,53 @@
 # MCP Hyperliquid Server
 
-MCP server tích hợp với Hyperliquid protocols, cung cấp các công cụ để tương tác với sàn giao dịch Hyperliquid thông qua giao thức Model Context Protocol.
+A Model Context Protocol (MCP) server that integrates with Hyperliquid, a decentralized perpetual futures exchange. This server exposes Hyperliquid's trading APIs as MCP tools, allowing AI assistants like Claude to interact with the exchange programmatically.
 
-## Tính năng
+## Features
 
-### Truy vấn thông tin
-- **Query Positions**: Xem danh sách các vị thế (positions) hiện tại
-- **Query Orders**: Xem danh sách lệnh (orders) đang mở và lịch sử
-- **Market Data**: Lấy thông tin thị trường, giá, volume
+### Account & Position Management
+- **Query Positions**: View all current open positions with real-time P&L
+- **Query Orders**: Access open orders and historical order data
+- **Account Information**: Get account balance, margin, and leverage details
 
-### Quản lý giao dịch
-- **Create Orders**: Tạo lệnh mua/bán mới
-- **Cancel Orders**: Hủy lệnh đang mở
-- **Modify Orders**: Chỉnh sửa lệnh hiện có
+### Market Data
+- **Real-time Prices**: Fetch current market prices for any perpetual contract
+- **Order Book**: View bid/ask depths and spreads
+- **Market Statistics**: Access 24h volume, funding rates, and open interest
+- **Historical Data**: Query candles/OHLCV data for technical analysis
 
-## Cài đặt
+### Trading Operations
+- **Create Orders**: Place limit, market, and stop orders
+- **Cancel Orders**: Cancel individual or all open orders
+- **Modify Orders**: Update price and size for existing orders
+- **Position Management**: Close positions with market orders
 
-### Yêu cầu
+### Risk Management
+- **Leverage Control**: Adjust leverage for different assets
+- **Position Monitoring**: Track unrealized P&L and liquidation prices
+- **Order Validation**: Pre-execution checks for price and size parameters
+
+## Installation & Setup
+
+### Prerequisites
 - Node.js >= 18
-- Private key của ví Hyperliquid
+- Claude Desktop App
+- Hyperliquid wallet private key
 
-### Cấu hình Claude Desktop
+### Integration with Claude Desktop
 
-Thêm cấu hình sau vào file `claude_desktop_config.json`:
+Add the following configuration to your `claude_desktop_config.json` file:
 
+**Location:**
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+
+**Configuration:**
 ```json
 {
   "mcpServers": {
     "hyperliquid": {
-      "command": "node",
-      "args": ["/path/to/mcp-hyperliquid/build/index.js"],
+      "command": "npx",
+      "args": ["-y", "@sondn.contact/mcp-hyperliquid"],
       "env": {
         "HYPERLIQUID_PRIVATE_KEY": "your_private_key_here",
         "HYPERLIQUID_TESTNET": "false"
@@ -39,59 +57,138 @@ Thêm cấu hình sau vào file `claude_desktop_config.json`:
 }
 ```
 
-**Tham số cấu hình:**
-- `HYPERLIQUID_PRIVATE_KEY`: Private key của ví Hyperliquid (bắt buộc)
-- `HYPERLIQUID_TESTNET`: `true` để sử dụng testnet, `false` hoặc không set để dùng mainnet
+**Configuration Parameters:**
+- `HYPERLIQUID_PRIVATE_KEY`: Your Hyperliquid wallet private key (required)
+- `HYPERLIQUID_TESTNET`: Set to `"true"` for testnet, `"false"` or omit for mainnet
 
-## Sử dụng
+**Restart Claude Desktop** after updating the configuration file.
 
-Sau khi cấu hình xong, bạn có thể sử dụng các công cụ trong Claude Desktop:
+## Usage Examples
 
-### Ví dụ truy vấn
+Once configured, you can interact with Hyperliquid through Claude Desktop using natural language:
+
+### Query Examples
 ```
-- "Hiển thị tất cả positions hiện tại của tôi"
-- "Xem danh sách orders đang mở"
-- "Giá hiện tại của BTC-PERP là bao nhiêu?"
-```
-
-### Ví dụ giao dịch
-```
-- "Tạo lệnh mua 0.1 BTC-PERP ở giá $50000"
-- "Hủy tất cả orders đang mở"
-- "Đóng vị thế ETH-PERP"
+- "Show all my current positions on Hyperliquid"
+- "What are my open orders?"
+- "What's the current price of BTC-PERP?"
+- "Show me the order book for ETH-PERP"
+- "What's my account balance and margin usage?"
 ```
 
-## Bảo mật
+### Trading Examples
+```
+- "Create a limit buy order for 0.1 BTC-PERP at $50,000"
+- "Place a market sell order for 1 ETH-PERP"
+- "Cancel all my open orders"
+- "Close my SOL-PERP position"
+- "Set leverage to 5x for BTC-PERP"
+```
 
-⚠️ **Quan trọng:**
-- Không bao giờ commit private key vào git
-- Private key được cấu hình trực tiếp trong Claude Desktop config
-- Sử dụng testnet để test trước khi giao dịch thật
-- Kiểm tra kỹ các thông số trước khi thực hiện lệnh
+### Analysis Examples
+```
+- "What's my total unrealized P&L?"
+- "Show me the funding rate for all my positions"
+- "What's the 24h volume for BTC-PERP?"
+- "Get 1-hour candles for ETH-PERP from the last 24 hours"
+```
 
-## Phát triển
+## Security
+
+⚠️ **Important Security Considerations:**
+- **Never commit your private key to version control**
+- Private keys are configured only in Claude Desktop's config file
+- **Always use testnet for development and testing** before trading with real funds
+- Validate all trading parameters (price, size, symbol) before execution
+- Be aware of slippage on market orders
+- Monitor your positions and account balance regularly
+
+## Development
+
+For local development and contributing:
 
 ```bash
-# Cài đặt dependencies
+# Install dependencies
 npm install
 
-# Build project
+# Build the project
 npm run build
 
-# Chạy tests
-npm test
-
-# Development mode
+# Run in development mode
 npm run dev
+
+# Run tests
+npm test
 ```
 
-## API Hyperliquid
+## How It Works
 
-Server này sử dụng:
-- **REST API**: Truy vấn dữ liệu tài khoản, thị trường
-- **WebSocket API**: Nhận cập nhật real-time
-- **Ed25519 signatures**: Ký các giao dịch authenticated
+This MCP server acts as a bridge between Claude (or any MCP client) and Hyperliquid:
+
+1. **MCP Protocol**: Communicates with Claude Desktop via stdio using the Model Context Protocol
+2. **Hyperliquid APIs**: Integrates with both REST and WebSocket APIs
+3. **Authentication**: Uses Ed25519 cryptographic signatures for authenticated requests
+4. **Environment Support**: Works with both Hyperliquid mainnet and testnet
+
+**Technology Stack:**
+- TypeScript for type-safe development
+- MCP SDK for protocol implementation
+- Hyperliquid REST API for trading operations
+- Hyperliquid WebSocket API for real-time data
+- Ed25519 signatures for authentication
+
+## Available MCP Tools
+
+The server exposes the following tools to Claude:
+
+- `get_positions` - Retrieve all open positions
+- `get_orders` - Get open and historical orders
+- `get_account_info` - Fetch account balance and margin details
+- `get_market_data` - Query real-time market data
+- `create_order` - Place new orders
+- `cancel_order` - Cancel specific orders
+- `cancel_all_orders` - Cancel all open orders
+- `modify_order` - Update existing orders
+- `close_position` - Close positions with market orders
+
+## Troubleshooting
+
+**Server not connecting:**
+- Verify the config file path and JSON syntax
+- Check that Node.js 18+ is installed: `node --version`
+- Restart Claude Desktop after config changes
+
+**Authentication errors:**
+- Ensure your private key is correct and properly formatted
+- Verify you're using the correct network (mainnet vs testnet)
+
+**Trading errors:**
+- Check that you have sufficient balance and margin
+- Verify symbol format (e.g., "BTC-PERP" not "BTCUSD")
+- Ensure price and size meet exchange requirements
+
+## Resources
+
+- [Hyperliquid Documentation](https://hyperliquid.gitbook.io/)
+- [Model Context Protocol](https://modelcontextprotocol.io/)
+- [Claude Desktop](https://claude.ai/download)
 
 ## License
 
 MIT
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
+
+## Contact
+
+For inquiries about developing AI Tools or custom MCP Servers, please contact:
+
+**Email:** sondn.5442@gmail.com
+
+Whether you need custom integrations, new MCP server development, or AI tool consulting, feel free to reach out.
+
+## Disclaimer
+
+This software is provided "as is" without warranty. Use at your own risk. Trading cryptocurrencies carries significant financial risk. Always test on testnet first and never trade with funds you cannot afford to lose.
