@@ -11,6 +11,8 @@ import { getPositions } from './tools/get-positions.js';
 import { getOrders } from './tools/get-orders.js';
 import { createOrder } from './tools/create-order.js';
 import { cancelOrder, cancelAllOrders } from './tools/cancel-order.js';
+import { getAccountInfo } from './tools/get-account-info.js';
+import { getMarketData } from './tools/get-market-data.js';
 
 // Validate environment variables
 const privateKey = process.env.HYPERLIQUID_PRIVATE_KEY;
@@ -125,6 +127,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: 'get_account_info',
+        description: 'Get comprehensive account information including wallet address, total balances, pending orders, and current positions',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+        },
+      },
+      {
+        name: 'get_market_data',
+        description: 'Get market data for a specific token/coin including price, volume, funding rate, and other market statistics',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            coin: {
+              type: 'string',
+              description: 'Token/coin symbol (e.g., BTC, ETH, SOL)',
+            },
+          },
+          required: ['coin'],
+        },
+      },
     ],
   };
 });
@@ -149,6 +173,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'cancel_all_orders':
         return await cancelAllOrders(hyperliquidClient);
+
+      case 'get_account_info':
+        return await getAccountInfo(hyperliquidClient);
+
+      case 'get_market_data':
+        return await getMarketData(hyperliquidClient, args as any);
 
       default:
         return {
